@@ -1,0 +1,21 @@
+.footer {
+  padding: 8px;
+  margin: 0;
+}
+
+.footer__container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 64px;
+}
+
+.footer__title {
+  margin: 0;
+  font-family: "Roboto Mono", sans-serif;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 24px;
+  color: #141414;
+}

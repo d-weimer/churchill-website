@@ -1,9 +1,12 @@
 import "./Header.css";
+import HeaderNavigation from "../HeaderNavigation/HeaderNavigation";
 
 function Header() {
   return (
     <>
-      <section></section>
+      <section>
+        <HeaderNavigation />
+      </section>
     </>
   );
 }
