@@ -1,9 +1,16 @@
 import "./App.css";
+import Header from "../Header/Header";
+import Main from "../Main/Main";
+import Footer from "../Footer/Footer";
 
 function App() {
   return (
     <>
-      <section></section>
+      <section>
+        <Header />
+        <Main />
+        <Footer />
+      </section>
     </>
   );
 }
