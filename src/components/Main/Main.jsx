@@ -1,9 +1,12 @@
 import "./Main.css";
+import MainNavigation from "../MainNavigation/MainNavigation";
 
 function Main() {
   return (
     <>
-      <section></section>
+      <section>
+        <MainNavigation />
+      </section>
     </>
   );
 }
