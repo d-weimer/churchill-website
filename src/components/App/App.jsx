@@ -1,10 +1,18 @@
 import { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 
 import "./App.css";
 import HeaderNavigation from "../HeaderNavigation/HeaderNavigation";
-import MainNavigation from "../MainNavigation/MainNavigation";
+import Main from "../Main/Main";
 import MenuOverlay from "../MenuOverlay/MenuOverlay";
 import Footer from "../Footer/Footer";
+
+import Writing from "../Writing/Writing";
+import Voice from "../Voice/Voice";
+import Film from "../Film/Film";
+import Music from "../Music/Music";
+import Gallery from "../Gallery/Gallery";
+
 import instagramIcon from "../../assets/instagram-white-icon.svg";
 import youtubeIcon from "../../assets/youtube-white-icon.svg";
 import bandcampIcon from "../../assets/bandcamp-white-icon.svg";
@@ -24,7 +32,14 @@ function App() {
       <MenuOverlay isOpen={isMenuOpen} onClose={toggleMenu} />
 
       <section className="app__main">
-        <MainNavigation />
+        <Routes>
+          <Route path="/" element={<Main />} />
+          <Route path="/writing" element={<Writing />} />
+          <Route path="/voice" element={<Voice />} />
+          <Route path="/film" element={<Film />} />
+          <Route path="/music" element={<Music />} />
+          <Route path="/gallery" element={<Gallery />} />
+        </Routes>
       </section>
 
       <section className="app__social-ribbon">
