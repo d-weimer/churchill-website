@@ -32,7 +32,7 @@ body,
   justify-content: center;
   align-items: center;
   gap: 24px;
-  padding: 32px 16px 64px;
+  padding: 32px 16px 24px;
   border-top: 1px solid #141414;
   margin-top: 32px;
 }
@@ -44,4 +44,20 @@ body,
 .app__social-icon {
   width: 48px;
   height: 48px;
+}
+
+.app__social-link[href*="youtube"] {
+  transform: scale(0.8);
+}
+
+.app__social-link[href*="bandcamp"] {
+  transform: scale(1.25);
+}
+
+.app__social-link[href*="soundcloud"] {
+  transform: scale(1.25);
+}
+
+.app__social-link[href*="spotify"] {
+  transform: scale(0.7);
 }

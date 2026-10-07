@@ -30,9 +30,9 @@
 
 .main-navigation__link {
   color: #ffffff;
-  font-size: 32px;
+  font-size: 48px;
   font-weight: 700;
-  line-height: 32px;
+  line-height: 1;
   text-decoration: none;
   width: fit-content;
   padding: 4px 0;
@@ -51,6 +51,6 @@
   position: absolute;
   bottom: 48px;
   right: 20px;
-  font-size: 32px;
+  font-size: 48px;
   cursor: pointer;
 }
