@@ -1,13 +1,12 @@
-import { NavLink } from "react-router-dom";
-
 import "./HeaderNavigation.css";
+import menu from "../../assets/menu-white.svg";
 
-function HeaderNavigation() {
+export default function HeaderNavigation() {
   return (
-    <>
-      <section></section>
-    </>
+    <header className="header-navigation">
+      <button className="menu-button">
+        <img src={menu} alt="Menu button" />
+      </button>
+    </header>
   );
 }
-
-export default HeaderNavigation;
