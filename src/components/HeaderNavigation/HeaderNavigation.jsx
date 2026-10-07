@@ -1,12 +1,15 @@
 import "./HeaderNavigation.css";
-import menu from "../../assets/menu-white.svg";
+import menuIcon from "../../assets/menu-white.svg";
 
-export default function HeaderNavigation() {
+export default function HeaderNavigation({ onToggleMenu, isMenuOpen }) {
   return (
     <header className="header-navigation">
-      <button className="menu-button">
-        <img src={menu} alt="Menu button" />
+      <button className="header-navigation__menu-button" onClick={onToggleMenu}>
+        <img src={menuIcon} alt="Menu button" />
       </button>
+      <a href="/" className="header-navigation__logo">
+        TEC III
+      </a>
     </header>
   );
 }
