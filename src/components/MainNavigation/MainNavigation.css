@@ -36,15 +36,19 @@
   text-decoration: none;
   width: fit-content;
   padding: 4px 0;
-  transition: opacity 0.2s ease;
+  opacity: 0.35;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 .main-navigation__link:hover {
-  opacity: 0.6;
+  opacity: 0.7;
 }
 
 .main-navigation__link.active {
   opacity: 1;
+  transform: translateX(4px);
 }
 
 .main-navigation__scroll-indicator {
@@ -52,5 +56,17 @@
   bottom: 48px;
   right: 20px;
   font-size: 48px;
+  color: #ffffff;
   cursor: pointer;
+  animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }

@@ -1,26 +1,36 @@
-import { NavLink } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import "./MainNavigation.css";
 
-function MainNavigation() {
+const NAV_ITEMS = [
+  { label: "Writing", path: "/writing" },
+  { label: "Voice", path: "/voice" },
+  { label: "Film", path: "/film" },
+  { label: "Music", path: "/music" },
+  { label: "Gallery", path: "/gallery" },
+];
+
+export default function MainNavigation({ activeIndex, onNavigate }) {
+  const navigate = useNavigate();
+
   return (
     <nav className="main-navigation">
       <div className="main-navigation__list">
-        <NavLink to="/writing" className="main-navigation__link">
-          Writing
-        </NavLink>
-        <NavLink to="/voice" className="main-navigation__link">
-          Voice
-        </NavLink>
-        <NavLink to="/film" className="main-navigation__link">
-          Film
-        </NavLink>
-        <NavLink to="/music" className="main-navigation__link">
-          Music
-        </NavLink>
-        <NavLink to="/gallery" className="main-navigation__link">
-          Gallery
-        </NavLink>
+        {NAV_ITEMS.map((item, index) => (
+          <a
+            key={item.label}
+            href={item.path}
+            className={`main-navigation__link ${
+              index === activeIndex ? "active" : ""
+            }`}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate(index);
+              navigate(item.path);
+            }}
+          >
+            {item.label}
+          </a>
+        ))}
       </div>
 
       <div className="main-navigation__scroll-indicator">
@@ -29,5 +39,3 @@ function MainNavigation() {
     </nav>
   );
 }
-
-export default MainNavigation;
