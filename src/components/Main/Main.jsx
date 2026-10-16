@@ -3,6 +3,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import "./Main.css";
 import MainBackground from "../MainBackground/MainBackground";
 import MainNavigation from "../MainNavigation/MainNavigation";
+import FeaturedWorks from "../FeaturedWorks/FeaturedWorks";
+import MostRecent from "../MostRecent/MostRecent";
 
 const TOTAL_ITEMS = 5;
 const IDLE_AUTO_SCROLL_DELAY = 8000;
@@ -80,6 +82,9 @@ function Main() {
         <MainBackground activeIndex={activeIndex} />
         <MainNavigation activeIndex={activeIndex} onNavigate={handleNavigate} />
       </section>
+
+      <FeaturedWorks />
+      <MostRecent />
     </div>
   );
 }
