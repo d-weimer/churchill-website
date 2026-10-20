@@ -1,0 +1,125 @@
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0 24px 32px;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+.menu-overlay__header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 64px;
+  padding: 16px 24px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 21;
+}
+
+.menu-overlay__close {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.menu-overlay__close-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.menu-overlay__logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.menu-overlay__navigation {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 96px;
+}
+
+.menu-overlay__link {
+  color: #ffffff;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  padding: 4px 0;
+}
+
+.menu-overlay__link:hover {
+  opacity: 0.6;
+}
+
+.menu-overlay__social-ribbon {
+  margin-top: auto;
+  margin-left: -20px;
+  margin-right: -20px;
+  width: calc(100% + 40px);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 24px 24px 0;
+  border-top: 1px solid #141414;
+  box-sizing: border-box;
+}
+
+.menu-overlay__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease;
+}
+
+.menu-overlay__social-link:hover {
+  opacity: 0.6;
+}
+
+.menu-overlay__social-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.menu-overlay__social-link[href*="youtube"] {
+  transform: scale(0.8);
+}
+
+.menu-overlay__social-link[href*="bandcamp"] {
+  transform: scale(1.25);
+}
+
+.menu-overlay__social-link[href*="soundcloud"] {
+  transform: scale(1.25);
+}
+
+.menu-overlay__social-link[href*="spotify"] {
+  transform: scale(0.7);
+}

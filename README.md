@@ -1,19 +1,35 @@
-# React + Vite
+# Thomas E. Churchill III Portfolio Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive mobile-first web application capturing the navigation, layout, and scrolling experience of the A24 website. Features an immersive landing stage with stepped background video switching, idle auto-advancing, dynamic page routing, modular content sections, and a fullscreen menu overlay. Built with React, Vite, and React Router.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **A24-Style Stepped Hero Navigation**: An immersive fullscreen landing stage where wheel or touch inputs step sequentially through navigation items (Writing, Voice, Film, Music, Gallery), instantly swapping the active background video.
+- **Background Video Pipeline (`MainBackground`)**: Dynamic video loading and playback orchestration tied to active navigation states, utilizing muted, looping, playsinline HTML5 video with a responsive darkening overlay.
+- **Idle Auto-Advance Loop**: A reactive timer that automatically cycles through the navigation steps when the user is idle, pausing instantly upon any manual scroll or click interaction.
+- **Seamless Page Flow & Content Reveal (`Main`)**: Intercepts scroll and wheel events to lock the user through the navigation items, unlocking standard browser scrolling once "Gallery" is reached to reveal the modular posts section below.
+- **Persistent Global Header & Mobile Menu Overlay**: Global header featuring a top logo, active mobile menu toggle (`isMenuOpen`), and a fullscreen slide-over `MenuOverlay` with locked body scroll behavior (`body--menu-open`), centered navigation links, and a full-width bottom social ribbon.
+- **Modular Content Architecture**: Cleanly separated component structure (`ContentSection`, `ContentCard`, `FeaturedWorks`, `MostRecent`) designed for future dynamic feed integration.
+- **Responsive Social & Streaming Integration**: Social ribbon featuring customized icon scaling compensation (Bandcamp, SoundCloud, Spotify, YouTube, Instagram) and negative margin border handling.
 
-## React Compiler
+## Component Structure
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- **`App`**: Global root component managing menu state (`isMenuOpen`), routing configuration via React Router, the persistent header, social ribbon, and footer.
+- **`HeaderNavigation`**: Top navigation bar coordinating mobile menu triggers and page routing.
+- **`MenuOverlay`**: Fullscreen slide-over navigation container featuring centered typography, close actions, and a full-width bottom social ribbon.
+- **`Main`**: Primary homepage coordinator managing the active navigation index, throttled wheel-event listeners, idle timer intervals, and post-section layout flow.
+- **`MainBackground`**: Dedicated video rendering component managing source mapping, loading states, and smooth playback transitions based on active navigation steps.
+- **`MainNavigation`**: Floating interactive navigation list handling active link highlighting, click selection, and animated scroll indicators.
+- **`ContentSection`**: Reusable structural wrapper providing section titles and responsive grid layouts.
+- **`ContentCard`**: Individual content card component rendering media placeholders, titles, descriptions, and external links.
+- **`FeaturedWorks`**: Curated section container for highlighted creative projects.
+- **`MostRecent`**: Dynamic stream section container for recent releases and updates.
+- **`Footer`**: Persistent site footer featuring developer attribution and links.
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+## Tech Stack
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend**: React, HTML5, CSS3
+- **Build Tooling**: Vite
+- **Routing**: React Router DOM
+- **Media**: HTML5 Video (`object-fit: cover`)
+- **Icons & Assets**: Custom SVG icons with proportional scale compensation

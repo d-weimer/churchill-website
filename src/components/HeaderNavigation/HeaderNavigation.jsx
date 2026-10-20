@@ -1,13 +1,15 @@
-import { NavLink } from "react-router-dom";
-
 import "./HeaderNavigation.css";
+import menuIcon from "../../assets/menu-white.svg";
 
-function HeaderNavigation() {
+export default function HeaderNavigation({ onToggleMenu, isMenuOpen }) {
   return (
-    <>
-      <section></section>
-    </>
+    <header className="header-navigation">
+      <button className="header-navigation__menu-button" onClick={onToggleMenu}>
+        <img src={menuIcon} alt="Menu button" />
+      </button>
+      <a href="/" className="header-navigation__logo">
+        TEC III
+      </a>
+    </header>
   );
 }
-
-export default HeaderNavigation;
