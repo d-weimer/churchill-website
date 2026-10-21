@@ -76,14 +76,32 @@ function Main() {
     resetIdleTimer();
   };
 
+  const handleScrollDown = () => {
+    const featuredSection = document.getElementById("featured-works");
+    if (featuredSection) {
+      featuredSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.scrollTo({
+        top: window.innerHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
   return (
     <div className="main">
       <section className="main__hero">
         <MainBackground activeIndex={activeIndex} />
-        <MainNavigation activeIndex={activeIndex} onNavigate={handleNavigate} />
+        <MainNavigation
+          activeIndex={activeIndex}
+          onNavigate={handleNavigate}
+          onScrollDown={handleScrollDown}
+        />
       </section>
 
-      <FeaturedWorks />
+      <div id="featured-works">
+        <FeaturedWorks />
+      </div>
       <MostRecent />
     </div>
   );
