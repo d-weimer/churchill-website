@@ -7,7 +7,7 @@ export default function HeaderNavigation({ onToggleMenu, isMenuOpen }) {
       <button className="header-navigation__menu-button" onClick={onToggleMenu}>
         <img src={menuIcon} alt="Menu button" />
       </button>
-      <a href="/" className="header-navigation__logo">
+      <a href="/churchill-website/" className="header-navigation__logo">
         TEC III
       </a>
     </header>

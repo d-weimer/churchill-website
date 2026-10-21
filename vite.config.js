@@ -2,10 +2,12 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  base: "/",
-  server: {
-    port: 3001,
-  },
+export default defineConfig(({ command }) => {
+  return {
+    plugins: [react()],
+    base: command === "build" ? "/churchill-website/" : "/",
+    server: {
+      port: 3001,
+    },
+  };
 });
