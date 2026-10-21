@@ -9,7 +9,11 @@ const NAV_ITEMS = [
   { label: "Gallery", path: "/gallery" },
 ];
 
-export default function MainNavigation({ activeIndex, onNavigate }) {
+export default function MainNavigation({
+  activeIndex,
+  onNavigate,
+  onScrollDown,
+}) {
   const navigate = useNavigate();
 
   return (
@@ -33,7 +37,7 @@ export default function MainNavigation({ activeIndex, onNavigate }) {
         ))}
       </div>
 
-      <div className="main-navigation__scroll-indicator">
+      <div className="main-navigation__scroll-indicator" onClick={onScrollDown}>
         <span>↓</span>
       </div>
     </nav>
