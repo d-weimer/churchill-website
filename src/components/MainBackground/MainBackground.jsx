@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import "./MainBackground.css";
 
 const VIDEO_SOURCES = [
@@ -9,18 +10,62 @@ const VIDEO_SOURCES = [
 ];
 
 export default function MainBackground({ activeIndex }) {
-  const currentVideoSrc = VIDEO_SOURCES[activeIndex] || VIDEO_SOURCES[0];
+  const videoRef = useRef(null);
+  const [displayedIndex, setDisplayedIndex] = useState(activeIndex);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDisplayedIndex(activeIndex);
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [activeIndex]);
+
+  const currentVideoSrc = VIDEO_SOURCES[displayedIndex] || VIDEO_SOURCES[0];
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    let isCancelled = false;
+
+    const playVideo = async () => {
+      try {
+        if (!videoElement.src.endsWith(currentVideoSrc)) {
+          videoElement.src = currentVideoSrc;
+          videoElement.load();
+        }
+
+        if (!isCancelled) {
+          const playPromise = videoElement.play();
+          if (playPromise !== undefined) {
+            await playPromise.catch(() => {
+              // Suppress abort errors from rapid skipping
+            });
+          }
+        }
+      } catch (err) {
+        // Suppress loading errors
+      }
+    };
+
+    playVideo();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentVideoSrc]);
 
   return (
     <div className="main-background">
       <video
-        key={currentVideoSrc}
-        src={currentVideoSrc}
+        ref={videoRef}
         className="main-background__video"
         autoPlay
         loop
         muted
         playsInline
+        preload="auto"
       />
       <div className="main-background__overlay" />
     </div>
