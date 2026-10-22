@@ -13,6 +13,8 @@ function Main() {
   const [activeIndex, setActiveIndex] = useState(0);
   const isLockedRef = useRef(false);
   const idleTimerRef = useRef(null);
+  const touchStartYRef = useRef(0);
+  const touchEndYRef = useRef(0);
 
   const resetIdleTimer = useCallback(() => {
     /*
@@ -35,12 +37,10 @@ function Main() {
     };
   }, [resetIdleTimer]);
 
-  useEffect(() => {
-    const handleWheel = (e) => {
-      if (window.scrollY > 10) return;
-
-      const scrollingDown = e.deltaY > 0;
-      const scrollingUp = e.deltaY < 0;
+  const changeSlide = useCallback(
+    (direction) => {
+      const scrollingDown = direction === "down";
+      const scrollingUp = direction === "up";
 
       if (activeIndex === TOTAL_ITEMS - 1 && scrollingDown) {
         return;
@@ -50,8 +50,6 @@ function Main() {
         (scrollingDown && activeIndex < TOTAL_ITEMS - 1) ||
         (scrollingUp && activeIndex > 0)
       ) {
-        e.preventDefault();
-
         if (isLockedRef.current) return;
         isLockedRef.current = true;
 
@@ -67,11 +65,85 @@ function Main() {
           isLockedRef.current = false;
         }, 400);
       }
+    },
+    [activeIndex, resetIdleTimer],
+  );
+
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (window.scrollY > 10) return;
+
+      const scrollingDown = e.deltaY > 0;
+      const scrollingUp = e.deltaY < 0;
+
+      if (activeIndex === TOTAL_ITEMS - 1 && scrollingDown) {
+        return; // Allow natural scroll past the last item
+      }
+
+      if (
+        (scrollingDown && activeIndex < TOTAL_ITEMS - 1) ||
+        (scrollingUp && activeIndex > 0)
+      ) {
+        e.preventDefault();
+        changeSlide(scrollingDown ? "down" : "up");
+      }
     };
 
     window.addEventListener("wheel", handleWheel, { passive: false });
     return () => window.removeEventListener("wheel", handleWheel);
-  }, [activeIndex, resetIdleTimer]);
+  }, [activeIndex, changeSlide]);
+
+  useEffect(() => {
+    const handleTouchStart = (e) => {
+      touchStartYRef.current = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (window.scrollY > 10) return;
+
+      const currentY = e.touches[0].clientY;
+      const deltaY = touchStartYRef.current - currentY;
+
+      // Allow natural page scroll if trying to move past Gallery (down) or Writing (up)
+      if (activeIndex === TOTAL_ITEMS - 1 && deltaY > 0) {
+        return;
+      }
+      if (activeIndex === 0 && deltaY < 0) {
+        return;
+      }
+
+      e.preventDefault();
+    };
+
+    const handleTouchEnd = (e) => {
+      if (window.scrollY > 10) return;
+
+      touchEndYRef.current = e.changedTouches[0].clientY;
+      const deltaY = touchStartYRef.current - touchEndYRef.current;
+      const minSwipeDistance = 50;
+
+      if (Math.abs(deltaY) > minSwipeDistance) {
+        if (deltaY > 0) {
+          // If we are at Gallery and trying to swipe further down, let it scroll naturally
+          if (activeIndex === TOTAL_ITEMS - 1) return;
+          changeSlide("down");
+        } else {
+          if (activeIndex === 0) return;
+          changeSlide("up");
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: false });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [activeIndex, changeSlide]);
 
   const handleNavigate = (index) => {
     setActiveIndex(index);
