@@ -7,7 +7,7 @@ import FeaturedWorks from "../FeaturedWorks/FeaturedWorks";
 import MostRecent from "../MostRecent/MostRecent";
 
 const TOTAL_ITEMS = 5;
-const IDLE_AUTO_SCROLL_DELAY = 8000;
+//const IDLE_AUTO_SCROLL_DELAY = 8000;
 
 function Main() {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -15,6 +15,7 @@ function Main() {
   const idleTimerRef = useRef(null);
 
   const resetIdleTimer = useCallback(() => {
+    /*
     if (idleTimerRef.current) {
       clearInterval(idleTimerRef.current);
     }
@@ -24,6 +25,7 @@ function Main() {
 
       setActiveIndex((prev) => (prev + 1) % TOTAL_ITEMS);
     }, IDLE_AUTO_SCROLL_DELAY);
+    */
   }, []);
 
   useEffect(() => {
