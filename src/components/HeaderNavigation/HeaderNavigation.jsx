@@ -1,7 +1,7 @@
 import "./HeaderNavigation.css";
 import menuIcon from "../../assets/menu-white.svg";
 
-export default function HeaderNavigation({ onToggleMenu, isMenuOpen }) {
+export default function HeaderNavigation({ onToggleMenu }) {
   return (
     <header className="header-navigation">
       <button className="header-navigation__menu-button" onClick={onToggleMenu}>

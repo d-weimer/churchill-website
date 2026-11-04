@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import "./App.css";
-import HeaderNavigation from "../HeaderNavigation/HeaderNavigation";
+import Header from "../Header/Header";
 import Main from "../Main/Main";
 import MenuOverlay from "../MenuOverlay/MenuOverlay";
 import Footer from "../Footer/Footer";
@@ -42,7 +42,7 @@ function App() {
 
   return (
     <div className="app">
-      <HeaderNavigation onToggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
+      <Header onToggleMenu={toggleMenu} isMenuOpen={isMenuOpen} />
       <MenuOverlay isOpen={isMenuOpen} onClose={toggleMenu} />
 
       <section className="app__main">

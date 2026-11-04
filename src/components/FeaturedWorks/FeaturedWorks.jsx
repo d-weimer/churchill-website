@@ -1,4 +1,3 @@
-import React from "react";
 import ContentSection from "../ContentSection/ContentSection";
 import ContentCard from "../ContentCard/ContentCard";
 import "./FeaturedWorks.css";

@@ -1,11 +1,11 @@
 import "./Header.css";
 import HeaderNavigation from "../HeaderNavigation/HeaderNavigation";
 
-function Header() {
+function Header({ onToggleMenu, isMenuOpen }) {
   return (
     <>
       <section>
-        <HeaderNavigation />
+        <HeaderNavigation onToggleMenu={onToggleMenu} isMenuOpen={isMenuOpen} />
       </section>
     </>
   );

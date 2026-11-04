@@ -44,7 +44,7 @@ export default function MainBackground({ activeIndex }) {
             });
           }
         }
-      } catch (err) {
+      } catch {
         // Suppress loading errors
       }
     };

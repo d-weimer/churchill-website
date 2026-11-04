@@ -1,4 +1,3 @@
-import React from "react";
 import "./ContentSection.css";
 
 export default function ContentSection({ title, children }) {

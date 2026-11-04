@@ -1,4 +1,3 @@
-import React from "react";
 import "./ContentCard.css";
 
 export default function ContentCard({ title, description, mediaClass, link }) {
