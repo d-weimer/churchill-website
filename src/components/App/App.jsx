@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import "./App.css";
 import HeaderNavigation from "../HeaderNavigation/HeaderNavigation";
@@ -13,6 +13,8 @@ import Film from "../Film/Film";
 import Music from "../Music/Music";
 import Gallery from "../Gallery/Gallery";
 
+import AdminPanel from "../AdminPanel/AdminPanel";
+
 import instagramIcon from "../../assets/instagram-white-icon.svg";
 import youtubeIcon from "../../assets/youtube-white-icon.svg";
 import bandcampIcon from "../../assets/bandcamp-white-icon.svg";
@@ -21,10 +23,22 @@ import spotifyIcon from "../../assets/spotify-white-icon.svg";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
+
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
+  if (isAdminRoute) {
+    return (
+      <Routes>
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/admin/*" element={<AdminPanel />} />
+      </Routes>
+    );
+  }
 
   return (
     <div className="app">
@@ -59,7 +73,7 @@ function App() {
           href="https://www.youtube.com/@ThomasChurchill3"
           target="_blank"
           rel="noreferrer"
-          className="app__ssocial-link"
+          className="app__social-link"
         >
           <img className="app__social-icon" src={youtubeIcon} alt="Youtube" />
         </a>

@@ -1,0 +1,25 @@
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background-color: #fff;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+}
+
+.admin-panel__body {
+  display: flex;
+  flex: 1;
+}
+
+.admin-panel__workspace {
+  flex: 1;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.admin-panel__workspace h2 {
+  font-size: 20px;
+  margin-top: 0;
+  margin-bottom: 20px;
+}

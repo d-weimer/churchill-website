@@ -1,0 +1,45 @@
+.admin-footer {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background-color: #e8e8e8;
+  border-top: 2px solid #141414;
+}
+
+.admin-footer__container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-footer__title {
+  margin: 0;
+  font-family: "Roboto Mono", monospace, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #141414;
+}
+
+.admin-footer__link {
+  margin: 0;
+  font-family: "Roboto Mono", monospace, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+  color: #141414;
+  text-decoration: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.admin-footer__contact-button {
+  border: none;
+  color: #141414;
+  background-color: #e8e8e8;
+  margin-bottom: 4px;
+  font-size: 32px;
+  cursor: pointer;
+}
