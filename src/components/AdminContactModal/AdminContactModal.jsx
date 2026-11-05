@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import "./AdminContactModal.css";
-import closeIcon from "../../assets/menu-close.svg";
+import closeIcon from "../../assets/menu-close-black.svg";
 
 function AdminContactModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
