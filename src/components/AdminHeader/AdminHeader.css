@@ -11,6 +11,7 @@
 .admin-header__title {
   color: #141414;
   margin: 0;
+  font-family: "Inter", sans-serif;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 2px;

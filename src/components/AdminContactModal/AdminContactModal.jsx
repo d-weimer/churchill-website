@@ -33,7 +33,7 @@ function AdminContactModal({ isOpen, onClose }) {
             className="admin-menu-overlay__close-icon"
           />
         </button>
-        <h3>Contact Developer</h3>
+        <h3>Contact Daniel</h3>
         <form onSubmit={handleSubmit}>
           <div className="admin-contact-modal__field">
             <label htmlFor="contact-name">Name</label>
