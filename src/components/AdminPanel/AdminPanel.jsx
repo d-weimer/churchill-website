@@ -7,6 +7,7 @@ import AdminSideBar from "../AdminSideBar/AdminSideBar";
 import AdminMenuOverlay from "../AdminMenuOverlay/AdminMenuOverlay";
 import AdminFooter from "../AdminFooter/AdminFooter";
 import AdminContactModal from "../AdminContactModal/AdminContactModal";
+import AdminAccount from "../AdminAccount/AdminAccount";
 
 function AdminPanel() {
   const [activeSection, setActiveSection] = useState("account");
@@ -40,12 +41,7 @@ function AdminPanel() {
         />
 
         <main className="admin-panel__workspace">
-          {activeSection === "account" && (
-            <div>
-              <h2>Account Workspace</h2>
-              {/* Account form components will plug in here */}
-            </div>
-          )}
+          {activeSection === "account" && <AdminAccount />}
           {activeSection === "posts" && (
             <div>
               <h2>Posts Workspace</h2>
