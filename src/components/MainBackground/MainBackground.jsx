@@ -1,72 +1,196 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./MainBackground.css";
+import { settingsApi } from "../../data/settingsData";
 
-const VIDEO_SOURCES = [
-  `${import.meta.env.BASE_URL}videos/writing-bg.mp4`,
-  `${import.meta.env.BASE_URL}videos/voice-bg.mp4`,
-  `${import.meta.env.BASE_URL}videos/film-bg.mp4`,
-  `${import.meta.env.BASE_URL}videos/music-bg.mp4`,
-  `${import.meta.env.BASE_URL}videos/gallery-bg.mp4`,
-];
+function getYouTubeId(url) {
+  if (!url) return null;
+  const regExp =
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(regExp);
+  return match ? match[1] : null;
+}
 
-export default function MainBackground({ activeIndex }) {
-  const videoRef = useRef(null);
-  const [displayedIndex, setDisplayedIndex] = useState(activeIndex);
+function getVimeoId(url) {
+  if (!url) return null;
+  const regExp =
+    /(?:vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^\/]+\/videos\/|album\/[^\/]+\/video\/|video\/|manage\/videos\/)?|player\.vimeo\.com\/video\/)([0-9]+)/;
+  const match = url.match(regExp);
+  if (match && match[1]) return match[1];
+  const fallback = url.match(/([0-9]{6,})/);
+  return fallback ? fallback[1] : null;
+}
+
+// Sub-component to manage individual YouTube API players, force HD quality, and destroy captions
+function YouTubeBackgroundPlayer({ youtubeId, isActive }) {
+  const containerRef = useRef(null);
+  const playerRef = useRef(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDisplayedIndex(activeIndex);
-    }, 150);
+    if (!youtubeId || !containerRef.current) return;
 
-    return () => clearTimeout(timer);
-  }, [activeIndex]);
+    let isMounted = true;
 
-  const currentVideoSrc = VIDEO_SOURCES[displayedIndex] || VIDEO_SOURCES[0];
+    const initPlayer = () => {
+      if (!isMounted || !containerRef.current) return;
+      containerRef.current.innerHTML = "";
+      const divId = `yt-player-${youtubeId}-${Math.random().toString(36).substring(7)}`;
+      const div = document.createElement("div");
+      div.id = divId;
+      div.style.width = "100%";
+      div.style.height = "100%";
+      containerRef.current.appendChild(div);
 
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
-
-    let isCancelled = false;
-
-    const playVideo = async () => {
       try {
-        if (!videoElement.src.endsWith(currentVideoSrc)) {
-          videoElement.src = currentVideoSrc;
-          videoElement.load();
-        }
-
-        if (!isCancelled) {
-          const playPromise = videoElement.play();
-          if (playPromise !== undefined) {
-            await playPromise.catch(() => {
-              // Suppress abort errors from rapid skipping
-            });
-          }
-        }
-      } catch {
-        // Suppress loading errors
-      }
+        playerRef.current = new window.YT.Player(divId, {
+          videoId: youtubeId,
+          playerVars: {
+            autoplay: 1,
+            mute: 1,
+            loop: 1,
+            playlist: youtubeId,
+            controls: 0,
+            disablekb: 1,
+            fs: 0,
+            modestbranding: 1,
+            rel: 0,
+            iv_load_policy: 3,
+            cc_load_policy: 0,
+            playsinline: 1,
+          },
+          events: {
+            onReady: (event) => {
+              event.target.mute();
+              event.target.setPlaybackQuality("hd1080");
+              event.target.playVideo();
+              // Forcefully unload the captions module to remove top/bottom subtitles
+              try {
+                if (typeof event.target.unloadModule === "function") {
+                  event.target.unloadModule("captions");
+                  event.target.unloadModule("cc");
+                }
+              } catch {}
+            },
+            onStateChange: (event) => {
+              if (event.data === window.YT.PlayerState.ENDED) {
+                event.target.playVideo();
+              }
+            },
+          },
+        });
+      } catch {}
     };
 
-    playVideo();
+    if (!window.YT || !window.YT.Player) {
+      if (!document.getElementById("youtube-iframe-api")) {
+        const tag = document.createElement("script");
+        tag.id = "youtube-iframe-api";
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScript = document.getElementsByTagName("script")[0];
+        firstScript.parentNode.insertBefore(tag, firstScript);
+      }
+      window.onYouTubeIframeAPIReady = initPlayer;
+      const interval = setInterval(() => {
+        if (window.YT && window.YT.Player) {
+          clearInterval(interval);
+          initPlayer();
+        }
+      }, 100);
+      return () => {
+        isMounted = false;
+        clearInterval(interval);
+      };
+    } else {
+      initPlayer();
+    }
 
     return () => {
-      isCancelled = true;
+      isMounted = false;
+      if (
+        playerRef.current &&
+        typeof playerRef.current.destroy === "function"
+      ) {
+        try {
+          playerRef.current.destroy();
+        } catch {}
+      }
     };
-  }, [currentVideoSrc]);
+  }, [youtubeId]);
+
+  return (
+    <div className="main-background__iframe-wrapper">
+      <div ref={containerRef} className="main-background__youtube" />
+      <div className="main-background__interaction-barrier" />
+    </div>
+  );
+}
+
+export default function MainBackground({ activeIndex }) {
+  const [customVideos, setCustomVideos] = useState({});
+
+  const loadVideos = () => {
+    settingsApi.getSettings().then((data) => {
+      setCustomVideos({
+        0: data.writingVideoUrl,
+        1: data.voiceVideoUrl,
+        2: data.filmVideoUrl,
+        3: data.musicVideoUrl,
+        4: data.galleryVideoUrl,
+      });
+    });
+  };
+
+  useEffect(() => {
+    loadVideos();
+    window.addEventListener("storage", loadVideos);
+    return () => window.removeEventListener("storage", loadVideos);
+  }, []);
 
   return (
     <div className="main-background">
-      <video
-        ref={videoRef}
-        className="main-background__video"
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-      />
+      {[0, 1, 2, 3, 4].map((index) => {
+        const url = customVideos[index] || "";
+        const youtubeId = getYouTubeId(url);
+        const vimeoId = getVimeoId(url);
+        const isActive = index === activeIndex;
+
+        return (
+          <div
+            key={index}
+            className={`main-background__layer ${isActive ? "is-active" : ""}`}
+          >
+            {youtubeId ? (
+              <YouTubeBackgroundPlayer
+                youtubeId={youtubeId}
+                isActive={isActive}
+              />
+            ) : vimeoId ? (
+              <div className="main-background__iframe-wrapper">
+                <iframe
+                  className="main-background__youtube"
+                  src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&autopause=0&muted=1&loop=1&background=1&transparent=0`}
+                  title={`Background ${index}`}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  tabIndex="-1"
+                  frameBorder="0"
+                />
+                <div className="main-background__interaction-barrier" />
+              </div>
+            ) : url ? (
+              <video
+                className="main-background__video"
+                src={url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+              />
+            ) : (
+              <div className="main-background__fallback" />
+            )}
+          </div>
+        );
+      })}
       <div className="main-background__overlay" />
     </div>
   );

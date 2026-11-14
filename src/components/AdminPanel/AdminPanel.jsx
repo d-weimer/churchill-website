@@ -9,6 +9,7 @@ import AdminFooter from "../AdminFooter/AdminFooter";
 import AdminContactModal from "../AdminContactModal/AdminContactModal";
 import AdminAccount from "../AdminAccount/AdminAccount";
 import AdminPosts from "../AdminPosts/AdminPosts";
+import AdminSettings from "../AdminSettings/AdminSettings";
 
 function AdminPanel() {
   const [activeSection, setActiveSection] = useState("account");
@@ -43,18 +44,8 @@ function AdminPanel() {
 
         <main className="admin-panel__workspace">
           {activeSection === "account" && <AdminAccount />}
-          {activeSection === "posts" && (
-            <div>
-              <h2>Posts Workspace</h2>
-              {activeSection === "posts" && <AdminPosts />}
-            </div>
-          )}
-          {activeSection === "settings" && (
-            <div>
-              <h2>Settings Workspace</h2>
-              {/* Background video settings components will plug in here */}
-            </div>
-          )}
+          {activeSection === "posts" && <AdminPosts />}
+          {activeSection === "settings" && <AdminSettings />}
         </main>
       </div>
 
