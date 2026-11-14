@@ -8,6 +8,7 @@ import AdminMenuOverlay from "../AdminMenuOverlay/AdminMenuOverlay";
 import AdminFooter from "../AdminFooter/AdminFooter";
 import AdminContactModal from "../AdminContactModal/AdminContactModal";
 import AdminAccount from "../AdminAccount/AdminAccount";
+import AdminPosts from "../AdminPosts/AdminPosts";
 
 function AdminPanel() {
   const [activeSection, setActiveSection] = useState("account");
@@ -45,7 +46,7 @@ function AdminPanel() {
           {activeSection === "posts" && (
             <div>
               <h2>Posts Workspace</h2>
-              {/* Post creation & post list components will plug in here */}
+              {activeSection === "posts" && <AdminPosts />}
             </div>
           )}
           {activeSection === "settings" && (
