@@ -1,43 +1,79 @@
-let mockPosts = [
-  {
-    id: "1",
-    title: "Sample Writing Entry",
-    category: "Writing",
-    status: "Published",
-    isFeatured: true,
-    date: "2026-04-28",
-    content: "Sample content...",
-  },
-  {
-    id: "2",
-    title: "New Film Preview",
-    category: "Film",
-    status: "Draft",
-    isFeatured: false,
-    date: "2026-04-29",
-    content: "Preview content...",
-  },
-  {
-    id: "3",
-    title: "Behind the scenes update on location",
+const POSTS_STORAGE_KEY = "tec_admin_posts";
+const SOCIALS_STORAGE_KEY = "tec_admin_socials";
+export const POSTS_UPDATED_EVENT = "tec_admin_posts_updated";
+
+const PLATFORM_LABELS = {
+  instagram: "Instagram",
+  youtube: "YouTube",
+  bandcamp: "Bandcamp",
+  soundcloud: "SoundCloud",
+  spotify: "Spotify",
+};
+
+function readJson(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function writePosts(posts) {
+  window.localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
+  window.dispatchEvent(new CustomEvent(POSTS_UPDATED_EVENT, { detail: posts }));
+}
+
+function loadCurrentPosts() {
+  const stored = readJson(POSTS_STORAGE_KEY, null);
+  if (Array.isArray(stored)) {
+    return stored;
+  }
+  const initial = [];
+  writePosts(initial);
+  return initial;
+}
+
+function extractSocialLinks(socials) {
+  if (!socials || typeof socials !== "object") return [];
+
+  return Object.entries(PLATFORM_LABELS)
+    .map(([key, platform]) => ({
+      id: key,
+      platform,
+      url: typeof socials[key] === "string" ? socials[key].trim() : "",
+    }))
+    .filter((item) => Boolean(item.url));
+}
+
+function buildSocialPost(link) {
+  return {
+    id: `social-${link.id}`,
+    title: `${link.platform} Update`,
     category: "Social",
     status: "Published",
     isFeatured: false,
-    date: "2026-04-30",
-    content: "Quick update from the set! Check out the latest photos...",
-  },
-];
+    date: new Date().toISOString().split("T")[0],
+    content: link.url,
+    url: link.url,
+    platform: link.platform,
+    source: "social",
+  };
+}
 
 export const postsApi = {
   getPosts: async () => {
-    return [...mockPosts];
+    return [...loadCurrentPosts()];
   },
 
   savePost: async (formData, editingId) => {
+    const posts = loadCurrentPosts();
     if (editingId) {
-      mockPosts = mockPosts.map((post) =>
+      const updated = posts.map((post) =>
         post.id === editingId ? { ...post, ...formData } : post,
       );
+      writePosts(updated);
       return { success: true, message: "Post updated successfully!" };
     } else {
       const newEntry = {
@@ -45,20 +81,58 @@ export const postsApi = {
         id: Date.now().toString(),
         date: new Date().toISOString().split("T")[0],
       };
-      mockPosts = [newEntry, ...mockPosts];
+      writePosts([newEntry, ...posts]);
       return { success: true, message: "Post created successfully!" };
     }
   },
 
   deletePost: async (id) => {
-    mockPosts = mockPosts.filter((post) => post.id !== id);
+    const posts = loadCurrentPosts().filter((post) => post.id !== id);
+    writePosts(posts);
     return { success: true };
   },
 
   toggleFeatured: async (id) => {
-    mockPosts = mockPosts.map((post) =>
+    const posts = loadCurrentPosts().map((post) =>
       post.id === id ? { ...post, isFeatured: !post.isFeatured } : post,
     );
+    writePosts(posts);
     return { success: true };
+  },
+
+  getSocialLinks: () => {
+    const socials = readJson(SOCIALS_STORAGE_KEY, {});
+    return extractSocialLinks(socials);
+  },
+
+  syncFromSocialLinks: async (
+    socialsOverride = null,
+    { merge = true } = {},
+  ) => {
+    const socials = socialsOverride || readJson(SOCIALS_STORAGE_KEY, {});
+    const links = extractSocialLinks(socials);
+    const current = merge ? loadCurrentPosts() : [];
+    const existingById = new Map(current.map((post) => [post.id, post]));
+
+    const socialPosts = links.map((link) => {
+      const generated = buildSocialPost(link);
+      const existing = existingById.get(generated.id);
+      if (existing) {
+        return {
+          ...existing,
+          content: existing.content || generated.url,
+          url: generated.url,
+          platform: generated.platform,
+        };
+      }
+      return generated;
+    });
+
+    const nextPosts = merge
+      ? [...socialPosts, ...current.filter((post) => post.source !== "social")]
+      : socialPosts;
+
+    writePosts(nextPosts);
+    return [...nextPosts];
   },
 };

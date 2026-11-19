@@ -1,19 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import "./AdminSocialLinks.css";
+import { postsApi } from "../../data/postsData";
+
+const SOCIALS_STORAGE_KEY = "tec_admin_socials";
+
+const INITIAL_SOCIALS = {
+  instagram: "",
+  youtube: "",
+  bandcamp: "",
+  soundcloud: "",
+  spotify: "",
+};
+
+function readSavedSocials() {
+  try {
+    const raw = window.localStorage.getItem(SOCIALS_STORAGE_KEY);
+    if (!raw) return { ...INITIAL_SOCIALS };
+    const parsed = JSON.parse(raw);
+    return {
+      ...INITIAL_SOCIALS,
+      ...(parsed && typeof parsed === "object" ? parsed : {}),
+    };
+  } catch {
+    return { ...INITIAL_SOCIALS };
+  }
+}
 
 function AdminSocialLinks() {
-  const [socials, setSocials] = useState({
-    instagram: "",
-    youtube: "",
-    bandcamp: "",
-    soundcloud: "",
-    spotify: "",
-  });
+  const [socials, setSocials] = useState(readSavedSocials);
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    setSocials(readSavedSocials());
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Saving social links...", socials);
+    const normalized = {
+      instagram: (socials.instagram || "").trim(),
+      youtube: (socials.youtube || "").trim(),
+      bandcamp: (socials.bandcamp || "").trim(),
+      soundcloud: (socials.soundcloud || "").trim(),
+      spotify: (socials.spotify || "").trim(),
+    };
+
+    window.localStorage.setItem(
+      SOCIALS_STORAGE_KEY,
+      JSON.stringify(normalized),
+    );
+    setSocials(normalized);
+
+    await postsApi.syncFromSocialLinks(normalized);
+    console.log("Saved social links:", normalized);
     alert("Social links updated successfully!");
   };
 

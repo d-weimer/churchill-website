@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import "./AdminPosts.css";
 import AdminNewPostModal from "../AdminNewPostModal/AdminNewPostModal";
-import { postsApi } from "../../data/postsData";
+import { postsApi, POSTS_UPDATED_EVENT } from "../../data/postsData";
 
 export default function AdminPosts() {
   const [posts, setPosts] = useState([]);
@@ -18,14 +18,20 @@ export default function AdminPosts() {
     content: "",
   });
 
-  useEffect(() => {
-    loadPosts();
-  }, []);
-
   const loadPosts = async () => {
     const data = await postsApi.getPosts();
     setPosts(data);
   };
+
+  useEffect(() => {
+    loadPosts();
+    window.addEventListener(POSTS_UPDATED_EVENT, loadPosts);
+    window.addEventListener("storage", loadPosts);
+    return () => {
+      window.removeEventListener(POSTS_UPDATED_EVENT, loadPosts);
+      window.removeEventListener("storage", loadPosts);
+    };
+  }, []);
 
   const handleOpenCreateModal = () => {
     setEditingId(null);

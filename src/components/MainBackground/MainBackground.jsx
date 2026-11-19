@@ -20,7 +20,6 @@ function getVimeoId(url) {
   return fallback ? fallback[1] : null;
 }
 
-// Sub-component to manage individual YouTube API players, force HD quality, and destroy captions
 function YouTubeBackgroundPlayer({ youtubeId, isActive }) {
   const containerRef = useRef(null);
   const playerRef = useRef(null);
@@ -62,7 +61,6 @@ function YouTubeBackgroundPlayer({ youtubeId, isActive }) {
               event.target.mute();
               event.target.setPlaybackQuality("hd1080");
               event.target.playVideo();
-              // Forcefully unload the captions module to remove top/bottom subtitles
               try {
                 if (typeof event.target.unloadModule === "function") {
                   event.target.unloadModule("captions");

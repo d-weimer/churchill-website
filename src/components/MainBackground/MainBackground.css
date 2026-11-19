@@ -9,8 +9,6 @@
   background-color: #000000;
 }
 
-/* Instead of display: none (which throttles buffering), we keep all layers in the DOM 
-   using opacity and pointer-events so they constantly buffer in high definition */
 .main-background__layer {
   position: absolute;
   top: 0;

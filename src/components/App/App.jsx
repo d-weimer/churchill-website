@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 
 import "./App.css";
@@ -14,6 +14,8 @@ import Music from "../Music/Music";
 import Gallery from "../Gallery/Gallery";
 
 import AdminPanel from "../AdminPanel/AdminPanel";
+import { settingsApi } from "../../data/settingsData";
+import { SETTINGS_UPDATED_EVENT } from "../AdminSettings/AdminSettings";
 
 import instagramIcon from "../../assets/instagram-white-icon.svg";
 import youtubeIcon from "../../assets/youtube-white-icon.svg";
@@ -23,7 +25,46 @@ import spotifyIcon from "../../assets/spotify-white-icon.svg";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [siteConfig, setSiteConfig] = useState({
+    siteTitle: "Thomas E. Churchill III",
+    siteTagline: "",
+    maintenanceMode: false,
+  });
   const location = useLocation();
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const syncSettings = async () => {
+      const data = await settingsApi.getSettings();
+      if (!isMounted) return;
+
+      const title =
+        typeof data?.siteTitle === "string" && data.siteTitle.trim()
+          ? data.siteTitle.trim()
+          : "Thomas E. Churchill III";
+      const tagline =
+        typeof data?.siteTagline === "string" ? data.siteTagline.trim() : "";
+      const maintenance = Boolean(data?.maintenanceMode);
+
+      document.title = title;
+      setSiteConfig({
+        siteTitle: title,
+        siteTagline: tagline,
+        maintenanceMode: maintenance,
+      });
+    };
+
+    syncSettings();
+    window.addEventListener(SETTINGS_UPDATED_EVENT, syncSettings);
+    window.addEventListener("storage", syncSettings);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener(SETTINGS_UPDATED_EVENT, syncSettings);
+      window.removeEventListener("storage", syncSettings);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
@@ -37,6 +78,23 @@ function App() {
         <Route path="/admin" element={<AdminPanel />} />
         <Route path="/admin/*" element={<AdminPanel />} />
       </Routes>
+    );
+  }
+
+  if (siteConfig.maintenanceMode) {
+    return (
+      <div className="app app--maintenance">
+        <div className="app__maintenance-card">
+          <h1 className="app__maintenance-title">{siteConfig.siteTitle}</h1>
+          {siteConfig.siteTagline && (
+            <p className="app__maintenance-tagline">{siteConfig.siteTagline}</p>
+          )}
+          <p className="app__maintenance-message">
+            We are currently performing scheduled maintenance. Please check back
+            soon.
+          </p>
+        </div>
+      </div>
     );
   }
 

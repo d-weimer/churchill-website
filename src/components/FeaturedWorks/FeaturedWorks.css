@@ -1,3 +1,11 @@
 .featured-works-wrapper {
   width: 100%;
 }
+
+.featured-works__empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  font-size: 16px;
+  color: #888888;
+}

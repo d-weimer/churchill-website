@@ -73,6 +73,19 @@ function Main() {
         ? heroRef.current.offsetHeight
         : window.innerHeight;
 
+      if (window.scrollY > 10 && scrollingUp) {
+        if (window.scrollY <= heroHeight + 40) {
+          e.preventDefault();
+          if (isLockedRef.current) return;
+          isLockedRef.current = true;
+          handleScrollUpToHero();
+          setTimeout(() => {
+            isLockedRef.current = false;
+          }, 600);
+        }
+        return;
+      }
+
       if (window.scrollY < heroHeight - 50) {
         e.preventDefault();
         if (activeIndex === TOTAL_ITEMS - 1 && scrollingDown) {
@@ -80,14 +93,6 @@ function Main() {
         } else {
           changeSlide(scrollingDown ? "down" : "up");
         }
-      } else if (scrollingUp) {
-        if (isLockedRef.current) return;
-        e.preventDefault();
-        isLockedRef.current = true;
-        handleScrollUpToHero();
-        setTimeout(() => {
-          isLockedRef.current = false;
-        }, 600);
       }
     };
 
@@ -104,14 +109,8 @@ function Main() {
       const heroHeight = heroRef.current
         ? heroRef.current.offsetHeight
         : window.innerHeight;
-      if (window.scrollY < heroHeight - 50) {
+      if (window.scrollY <= 10 && window.scrollY < heroHeight - 50) {
         e.preventDefault();
-      } else {
-        const currentY = e.touches[0].clientY;
-        const deltaY = touchStartYRef.current - currentY;
-        if (deltaY < 0) {
-          e.preventDefault();
-        }
       }
     };
 
@@ -124,21 +123,26 @@ function Main() {
         : window.innerHeight;
 
       if (Math.abs(deltaY) > minSwipeDistance) {
+        if (window.scrollY > 10 && deltaY < 0) {
+          if (window.scrollY <= heroHeight + 40) {
+            handleScrollUpToHero();
+          }
+          return;
+        }
+
         if (window.scrollY < heroHeight - 50) {
           if (deltaY > 0) {
             changeSlide("down");
-          } else {
-            if (activeIndex > 0) changeSlide("up");
+          } else if (activeIndex > 0) {
+            changeSlide("up");
           }
-        } else if (deltaY < 0) {
-          handleScrollUpToHero();
         }
       }
     };
 
     window.addEventListener("touchstart", handleTouchStart, { passive: true });
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
-    window.addEventListener("touchend", handleTouchEnd, { passive: false });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
 
     return () => {
       window.removeEventListener("touchstart", handleTouchStart);
@@ -165,7 +169,9 @@ function Main() {
       <div id="featured-works">
         <FeaturedWorks />
       </div>
-      <MostRecent />
+      <div id="most-recent">
+        <MostRecent />
+      </div>
     </div>
   );
 }

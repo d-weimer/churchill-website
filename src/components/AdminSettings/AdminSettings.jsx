@@ -3,20 +3,28 @@ import { useState, useEffect } from "react";
 import "./AdminSettings.css";
 import { settingsApi } from "../../data/settingsData";
 
-export default function AdminSettings() {
-  const [settings, setSettings] = useState({
-    siteTitle: "",
-    siteTagline: "",
-    postsPerPage: "10",
-    enableComments: true,
-    maintenanceMode: false,
-    writingVideoUrl: "",
-    voiceVideoUrl: "",
-    filmVideoUrl: "",
-    musicVideoUrl: "",
-    galleryVideoUrl: "",
-  });
+export const SETTINGS_UPDATED_EVENT = "tec_admin_settings_updated";
 
+const DEFAULT_SETTINGS = {
+  siteTitle: "Thomas E. Churchill III",
+  siteTagline: "",
+  maintenanceMode: false,
+  writingVideoUrl: "",
+  voiceVideoUrl: "",
+  filmVideoUrl: "",
+  musicVideoUrl: "",
+  galleryVideoUrl: "",
+};
+
+function applyDocumentTitle(title) {
+  const trimmed = typeof title === "string" ? title.trim() : "";
+  if (trimmed) {
+    document.title = title;
+  }
+}
+
+export default function AdminSettings() {
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +33,14 @@ export default function AdminSettings() {
 
   const loadSettings = async () => {
     const data = await settingsApi.getSettings();
-    setSettings(data);
+    const {
+      postsPerPage: _removedPostsPerPage,
+      enableComments: _removedEnableComments,
+      ...rest
+    } = data || {};
+    const merged = { ...DEFAULT_SETTINGS, ...rest };
+    setSettings(merged);
+    applyDocumentTitle(merged.siteTitle);
     setIsLoading(false);
   };
 
@@ -39,8 +54,19 @@ export default function AdminSettings() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await settingsApi.saveSettings(settings);
+    const normalized = {
+      ...settings,
+      siteTitle: (settings.siteTitle || "").trim(),
+      siteTagline: (settings.siteTagline || "").trim(),
+    };
+
+    const res = await settingsApi.saveSettings(normalized);
     if (res.success) {
+      setSettings(normalized);
+      applyDocumentTitle(normalized.siteTitle);
+      window.dispatchEvent(
+        new CustomEvent(SETTINGS_UPDATED_EVENT, { detail: normalized }),
+      );
       alert(res.message);
     }
   };
@@ -80,21 +106,6 @@ export default function AdminSettings() {
               value={settings.siteTagline}
               onChange={handleChange}
             />
-          </div>
-
-          <div className="admin-settings__field">
-            <label htmlFor="postsPerPage">Posts Displayed Per Page</label>
-            <select
-              id="postsPerPage"
-              name="postsPerPage"
-              value={settings.postsPerPage}
-              onChange={handleChange}
-            >
-              <option value="5">5 Posts</option>
-              <option value="10">10 Posts</option>
-              <option value="20">20 Posts</option>
-              <option value="50">50 Posts</option>
-            </select>
           </div>
         </section>
 
@@ -168,18 +179,6 @@ export default function AdminSettings() {
 
         <section className="admin-settings__section">
           <h3>System Preferences & Controls</h3>
-
-          <div className="admin-settings__checkbox-field">
-            <label>
-              <input
-                type="checkbox"
-                name="enableComments"
-                checked={settings.enableComments}
-                onChange={handleChange}
-              />
-              Enable public comments/interaction on entries
-            </label>
-          </div>
 
           <div className="admin-settings__checkbox-field">
             <label>
