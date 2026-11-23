@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 
 import "./AdminSocialLinks.css";
 import { postsApi } from "../../data/postsData";
-
-const SOCIALS_STORAGE_KEY = "tec_admin_socials";
+import {
+  SOCIALS_STORAGE_KEY,
+  SOCIALS_UPDATED_EVENT,
+} from "../../data/socialLinks";
 
 const INITIAL_SOCIALS = {
   instagram: "",
@@ -47,6 +49,9 @@ function AdminSocialLinks() {
     window.localStorage.setItem(
       SOCIALS_STORAGE_KEY,
       JSON.stringify(normalized),
+    );
+    window.dispatchEvent(
+      new CustomEvent(SOCIALS_UPDATED_EVENT, { detail: normalized }),
     );
     setSocials(normalized);
 
