@@ -3,8 +3,8 @@ import youtubeIcon from "../assets/youtube-white-icon.svg";
 import bandcampIcon from "../assets/bandcamp-white-icon.svg";
 import soundcloudIcon from "../assets/soundcloud-white-icon.svg";
 import spotifyIcon from "../assets/spotify-white-icon.svg";
+import { settingsApi } from "./settingsData";
 
-export const SOCIALS_STORAGE_KEY = "tec_admin_socials";
 export const SOCIALS_UPDATED_EVENT = "tec_admin_socials_updated";
 
 export const SOCIAL_PLATFORMS = [
@@ -15,21 +15,19 @@ export const SOCIAL_PLATFORMS = [
   { key: "spotify", label: "Spotify", icon: spotifyIcon },
 ];
 
-export function getActiveSocialLinks() {
-  try {
-    const raw = window.localStorage.getItem(SOCIALS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== "object") return [];
+export function getActiveSocialLinks(socialsObj = {}) {
+  if (!socialsObj || typeof socialsObj !== "object") return [];
 
-    return SOCIAL_PLATFORMS.map((platform) => ({
-      ...platform,
-      url:
-        typeof parsed[platform.key] === "string"
-          ? parsed[platform.key].trim()
-          : "",
-    })).filter((item) => Boolean(item.url));
-  } catch {
-    return [];
-  }
+  return SOCIAL_PLATFORMS.map((platform) => ({
+    ...platform,
+    url:
+      typeof socialsObj[platform.key] === "string"
+        ? socialsObj[platform.key].trim()
+        : "",
+  })).filter((item) => Boolean(item.url));
+}
+
+export async function fetchActiveSocialLinks() {
+  const settings = await settingsApi.getSettings();
+  return getActiveSocialLinks(settings?.socials);
 }

@@ -66,16 +66,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const syncSocials = () => {
-      setActiveSocials(getActiveSocialLinks());
+    let isMounted = true;
+
+    const syncSocials = async () => {
+      const links = await fetchActiveSocialLinks();
+      if (isMounted) {
+        setActiveSocials(links);
+      }
     };
 
     syncSocials();
     window.addEventListener(SOCIALS_UPDATED_EVENT, syncSocials);
+    window.addEventListener(SETTINGS_UPDATED_EVENT, syncSocials);
     window.addEventListener("storage", syncSocials);
 
     return () => {
+      isMounted = false;
       window.removeEventListener(SOCIALS_UPDATED_EVENT, syncSocials);
+      window.removeEventListener(SETTINGS_UPDATED_EVENT, syncSocials);
       window.removeEventListener("storage", syncSocials);
     };
   }, []);

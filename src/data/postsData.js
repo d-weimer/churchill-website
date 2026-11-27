@@ -1,5 +1,6 @@
-const POSTS_STORAGE_KEY = "tec_admin_posts";
-const SOCIALS_STORAGE_KEY = "tec_admin_socials";
+import { apiRequest } from "../utils/api";
+import { settingsApi } from "./settingsData";
+
 export const POSTS_UPDATED_EVENT = "tec_admin_posts_updated";
 
 const PLATFORM_LABELS = {
@@ -10,29 +11,8 @@ const PLATFORM_LABELS = {
   spotify: "Spotify",
 };
 
-function readJson(key, fallback) {
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-
-function writePosts(posts) {
-  window.localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(posts));
+function emitPostsUpdated(posts) {
   window.dispatchEvent(new CustomEvent(POSTS_UPDATED_EVENT, { detail: posts }));
-}
-
-function loadCurrentPosts() {
-  const stored = readJson(POSTS_STORAGE_KEY, null);
-  if (Array.isArray(stored)) {
-    return stored;
-  }
-  const initial = [];
-  writePosts(initial);
-  return initial;
 }
 
 function extractSocialLinks(socials) {
@@ -49,7 +29,6 @@ function extractSocialLinks(socials) {
 
 function buildSocialPost(link) {
   return {
-    id: `social-${link.id}`,
     title: `${link.platform} Update`,
     category: "Social",
     status: "Published",
@@ -59,80 +38,109 @@ function buildSocialPost(link) {
     url: link.url,
     platform: link.platform,
     source: "social",
+    socialKey: `social-${link.id}`,
   };
 }
 
 export const postsApi = {
-  getPosts: async () => {
-    return [...loadCurrentPosts()];
-  },
-
-  savePost: async (formData, editingId) => {
-    const posts = loadCurrentPosts();
-    if (editingId) {
-      const updated = posts.map((post) =>
-        post.id === editingId ? { ...post, ...formData } : post,
-      );
-      writePosts(updated);
-      return { success: true, message: "Post updated successfully!" };
-    } else {
-      const newEntry = {
-        ...formData,
-        id: Date.now().toString(),
-        date: new Date().toISOString().split("T")[0],
-      };
-      writePosts([newEntry, ...posts]);
-      return { success: true, message: "Post created successfully!" };
+  getPosts: async ({ includeDrafts = true } = {}) => {
+    try {
+      const endpoint = includeDrafts ? "/posts/all" : "/posts";
+      const posts = await apiRequest(endpoint);
+      return Array.isArray(posts) ? posts : [];
+    } catch {
+      // Fallback to public published posts if unauthenticated on /posts/all
+      const posts = await apiRequest("/posts");
+      return Array.isArray(posts) ? posts : [];
     }
   },
 
+  savePost: async (formData, editingId) => {
+    if (editingId) {
+      await apiRequest(`/posts/${editingId}`, {
+        method: "PUT",
+        body: JSON.stringify(formData),
+      });
+      const updated = await postsApi.getPosts();
+      emitPostsUpdated(updated);
+      return { success: true, message: "Post updated successfully!" };
+    }
+
+    const payload = {
+      ...formData,
+      date: formData.date || new Date().toISOString().split("T")[0],
+    };
+    await apiRequest("/posts", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    const updated = await postsApi.getPosts();
+    emitPostsUpdated(updated);
+    return { success: true, message: "Post created successfully!" };
+  },
+
   deletePost: async (id) => {
-    const posts = loadCurrentPosts().filter((post) => post.id !== id);
-    writePosts(posts);
+    await apiRequest(`/posts/${id}`, {
+      method: "DELETE",
+    });
+    const updated = await postsApi.getPosts();
+    emitPostsUpdated(updated);
     return { success: true };
   },
 
   toggleFeatured: async (id) => {
-    const posts = loadCurrentPosts().map((post) =>
-      post.id === id ? { ...post, isFeatured: !post.isFeatured } : post,
-    );
-    writePosts(posts);
+    const currentPosts = await postsApi.getPosts();
+    const target = currentPosts.find((post) => post.id === id);
+    if (!target) return { success: false };
+
+    await apiRequest(`/posts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ isFeatured: !target.isFeatured }),
+    });
+    const updated = await postsApi.getPosts();
+    emitPostsUpdated(updated);
     return { success: true };
   },
 
-  getSocialLinks: () => {
-    const socials = readJson(SOCIALS_STORAGE_KEY, {});
-    return extractSocialLinks(socials);
+  getSocialLinks: async () => {
+    const settings = await settingsApi.getSettings();
+    return extractSocialLinks(settings?.socials);
   },
 
-  syncFromSocialLinks: async (
-    socialsOverride = null,
-    { merge = true } = {},
-  ) => {
-    const socials = socialsOverride || readJson(SOCIALS_STORAGE_KEY, {});
-    const links = extractSocialLinks(socials);
-    const current = merge ? loadCurrentPosts() : [];
-    const existingById = new Map(current.map((post) => [post.id, post]));
+  syncFromSocialLinks: async (socialsOverride = null) => {
+    const settings = socialsOverride
+      ? { socials: socialsOverride }
+      : await settingsApi.getSettings();
+    const links = extractSocialLinks(settings?.socials);
+    const current = await postsApi.getPosts();
+    const existingSocialByKey = new Map(
+      current
+        .filter((post) => post.source === "social" && post.socialKey)
+        .map((post) => [post.socialKey, post]),
+    );
 
-    const socialPosts = links.map((link) => {
+    for (const link of links) {
       const generated = buildSocialPost(link);
-      const existing = existingById.get(generated.id);
+      const existing = existingSocialByKey.get(generated.socialKey);
       if (existing) {
-        return {
-          ...existing,
-          content: existing.content || generated.url,
-          url: generated.url,
-          platform: generated.platform,
-        };
+        await apiRequest(`/posts/${existing.id}`, {
+          method: "PUT",
+          body: JSON.stringify({
+            content: existing.content || generated.url,
+            url: generated.url,
+            platform: generated.platform,
+          }),
+        });
+      } else {
+        await apiRequest("/posts", {
+          method: "POST",
+          body: JSON.stringify(generated),
+        });
       }
-      return generated;
-    });
+    }
 
-    const nextPosts = merge
-      ? [...socialPosts, ...current.filter((post) => post.source !== "social")]
-      : socialPosts;
-
-    writePosts(nextPosts);
-    return [...nextPosts];
+    const nextPosts = await postsApi.getPosts();
+    emitPostsUpdated(nextPosts);
+    return nextPosts;
   },
 };
